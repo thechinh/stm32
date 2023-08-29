@@ -1,0 +1,100 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "/Users/chinh/Documents/PlatformIO/Projects/230826-212130-stm32cube-hal-blink/include",
+                "/Users/chinh/Documents/PlatformIO/Projects/230826-212130-stm32cube-hal-blink/src",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Include",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Device/ST/STM32F0xx/Include",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/STM32F0xx_HAL_Driver/Inc",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/STM32F0xx_HAL_Driver/Src",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/DSP/Include",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/l3gd20",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/hx8347d",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/stlm75",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/spfd5408",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/st7735",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/Common",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/i3g4250d",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Adafruit_Shield",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Utilities/CPU",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Utilities/Log",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Utilities/Fonts",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Core/Inc",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Core/Src",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/AUDIO/Inc",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/AUDIO/Src",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Inc",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Inc",
+                "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Src",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "/Users/chinh/Documents/PlatformIO/Projects/230826-212130-stm32cube-hal-blink/include",
+                    "/Users/chinh/Documents/PlatformIO/Projects/230826-212130-stm32cube-hal-blink/src",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Include",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Device/ST/STM32F0xx/Include",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/STM32F0xx_HAL_Driver/Inc",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/STM32F0xx_HAL_Driver/Src",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/DSP/Include",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/l3gd20",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/hx8347d",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/stlm75",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/spfd5408",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/st7735",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/Common",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Components/i3g4250d",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Drivers/BSP/Adafruit_Shield",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Utilities/CPU",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Utilities/Log",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Utilities/Fonts",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Core/Inc",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Core/Src",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/AUDIO/Inc",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/AUDIO/Src",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Inc",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Inc",
+                    "/Users/chinh/.platformio/packages/framework-stm32cubef0/Middlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Src",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=60110",
+                "STM32F072xB",
+                "F0",
+                "USE_HAL_DRIVER",
+                "F_CPU=48000000L",
+                ""
+            ],
+            "compilerPath": "/Users/chinh/.platformio/packages/toolchain-gccarmnoneeabi@1.70201.0/bin/arm-none-eabi-gcc",
+            "compilerArgs": [
+                "-mthumb",
+                "-mcpu=cortex-m0",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}

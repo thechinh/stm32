@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "STM32CubeF4",
+			"path": "STM32CubeF4"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"gpio.h": "c",
+			"stm32f0xx_hal.h": "c",
+			"main.h": "c",
+			"stm32f4xx_hal.h": "c",
+			"stm32f4xx_hal_conf.h": "c"
+		}
+	}
+}
