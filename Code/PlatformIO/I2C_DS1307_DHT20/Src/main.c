@@ -29,9 +29,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 #include "ds1307.h"
+#include "dht20.h"
 
 /* Private typedef -----------------------------------------------------------*/
-
 
 /* Private define ------------------------------------------------------------*/
 #define SET_TIME 0
@@ -42,13 +42,28 @@
 /* Private variables ---------------------------------------------------------*/
 DS1307_Time_t time;
 const char weekday[7][10] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+DHT20_Data_t dht20_data;
+char debug_msg[50] = {};
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 void MX_USB_HOST_Process(void);
 
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif
+
+PUTCHAR_PROTOTYPE
+{
+  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+  return ch;
+}
+
 /* Private user code ---------------------------------------------------------*/
+
 
 /**
   * @brief  The application entry point.
@@ -64,14 +79,14 @@ int main(void)
     time.day = 3;
     
     // 12:30 PM
-    time.hours = 6;
-    time.minutes = 52;
-    time.seconds = 20;
+    time.hours = 10;
+    time.minutes = 10;
+    time.seconds = 0;
     time.mode12h = 1;
-    time.pm = 0;
+    time.pm = 1;
   #endif
 
-  char time_rx[50] = {};
+  char uart_msg[80] = {};
 
   /* USER CODE END 1 */
 
@@ -104,7 +119,6 @@ int main(void)
   MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
-
   #if SET_TIME == 1
     if (DS1307_WriteTime(&hi2c1, &time) == -1) {
       char error[] = "Error: Invalid time\r\n";
@@ -113,6 +127,12 @@ int main(void)
     }
   #endif
 
+  HAL_Delay(1000); // to be removed
+
+  int ret = DHT20_Init(&hi2c1);
+  if (ret == HAL_ERROR)
+    return -1;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -120,10 +140,25 @@ int main(void)
   {
     MX_USB_HOST_Process();
 
+    // DHT20
+    dht20_data = DHT20_ReadData(&hi2c1);
+    
+    // Convert to string for printing only
+    char hum_str[10];
+    uint8_t hum_int = (uint8_t)dht20_data.humidity;
+    uint8_t hum_dec = (uint8_t)((dht20_data.humidity - hum_int)*100);
+    sprintf(hum_str, "%d.%02d", hum_int, hum_dec);
+    char temp_str[10];
+    uint8_t temp_int = (uint8_t)dht20_data.temperature;
+    uint8_t temp_dec = (uint8_t)((dht20_data.temperature - temp_int)*100);
+    sprintf(temp_str, "%d.%02d", temp_int, temp_dec);
+
+    // DS1307
     DS1307_ReadTime(&hi2c1, &time);
-    sprintf(time_rx, "%s %02d/%02d/20%02d - Time: %02d:%02d:%02d %s\r\n", 
-      weekday[time.day-1] ,time.date, time.month, time.year, time.hours, time.minutes, time.seconds, (time.mode12h)==1 ? ((time.pm == 1) ? "PM" : "AM") : "" );
-    HAL_UART_Transmit(&huart2, (uint8_t *)time_rx, strlen(time_rx), 100);
+    
+    sprintf(uart_msg, "%s %02d/%02d/20%02d - Time: %02d:%02d:%02d %s || Humidity: %s%% - Temperature: %soC \r\n", 
+      weekday[time.day-1] ,time.date, time.month, time.year, time.hours, time.minutes, time.seconds, (time.mode12h)==1 ? ((time.pm == 1) ? "PM" : "AM") : "", hum_str, temp_str);
+    HAL_UART_Transmit(&huart2, (uint8_t *)uart_msg, strlen(uart_msg), 100);
     
     HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin); // Heartbeat decoration
     HAL_Delay(1000);
