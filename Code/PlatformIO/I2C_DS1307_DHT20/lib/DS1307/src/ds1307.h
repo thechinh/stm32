@@ -1,9 +1,7 @@
 #ifndef __DS1307_H__
 #define __DS1307_H__
 
-#include <stdint.h>
 #include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_i2c.h"
 
 #define DS1307_ADDRESS 0x68 << 1
 #define DS1307_REG_TIME 0x00

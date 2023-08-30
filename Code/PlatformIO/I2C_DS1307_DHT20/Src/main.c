@@ -30,18 +30,19 @@
 /* Private includes ----------------------------------------------------------*/
 #include "ds1307.h"
 #include "dht20.h"
+#include "lcd1602_i2c.h"
 
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
-#define SET_TIME 0
+#define SET_TIME 0 // Set time to DS1307
+#define DISPLAY 1 // UART or LCD
 
 /* Private macro -------------------------------------------------------------*/
 
-
 /* Private variables ---------------------------------------------------------*/
 DS1307_Time_t time;
-const char weekday[7][10] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+const char weekday[7][10] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 DHT20_Data_t dht20_data;
 char debug_msg[50] = {};
 
@@ -50,20 +51,7 @@ void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 void MX_USB_HOST_Process(void);
 
-#ifdef __GNUC__
-#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif
-
-PUTCHAR_PROTOTYPE
-{
-  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-  return ch;
-}
-
 /* Private user code ---------------------------------------------------------*/
-
 
 /**
   * @brief  The application entry point.
@@ -72,21 +60,6 @@ PUTCHAR_PROTOTYPE
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  #if SET_TIME == 1
-    time.year = 23;
-    time.month = 8;
-    time.date = 29;
-    time.day = 3;
-    
-    // 12:30 PM
-    time.hours = 10;
-    time.minutes = 10;
-    time.seconds = 0;
-    time.mode12h = 1;
-    time.pm = 1;
-  #endif
-
-  char uart_msg[80] = {};
 
   /* USER CODE END 1 */
 
@@ -120,6 +93,18 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
   #if SET_TIME == 1
+    // Change time here
+    time.year = 23;
+    time.month = 8;
+    time.date = 30;
+    time.day = 4;
+    time.hours = 6;
+    time.minutes = 33;
+    time.seconds = 40;
+    time.mode12h = 1;
+    time.pm = 1;
+    
+    // Write time to DS1307
     if (DS1307_WriteTime(&hi2c1, &time) == -1) {
       char error[] = "Error: Invalid time\r\n";
       HAL_UART_Transmit(&huart2, (uint8_t *)error, strlen(error), 100);
@@ -127,11 +112,14 @@ int main(void)
     }
   #endif
 
-  HAL_Delay(1000); // to be removed
-
   int ret = DHT20_Init(&hi2c1);
   if (ret == HAL_ERROR)
     return -1;
+
+  #if DISPLAY == 1 // LCD
+    char msg[16];
+    lcd_init();
+  #endif
 
   /* USER CODE END 2 */
 
@@ -142,23 +130,34 @@ int main(void)
 
     // DHT20
     dht20_data = DHT20_ReadData(&hi2c1);
-    
-    // Convert to string for printing only
-    char hum_str[10];
-    uint8_t hum_int = (uint8_t)dht20_data.humidity;
-    uint8_t hum_dec = (uint8_t)((dht20_data.humidity - hum_int)*100);
-    sprintf(hum_str, "%d.%02d", hum_int, hum_dec);
-    char temp_str[10];
-    uint8_t temp_int = (uint8_t)dht20_data.temperature;
-    uint8_t temp_dec = (uint8_t)((dht20_data.temperature - temp_int)*100);
-    sprintf(temp_str, "%d.%02d", temp_int, temp_dec);
 
     // DS1307
     DS1307_ReadTime(&hi2c1, &time);
     
-    sprintf(uart_msg, "%s %02d/%02d/20%02d - Time: %02d:%02d:%02d %s || Humidity: %s%% - Temperature: %soC \r\n", 
-      weekday[time.day-1] ,time.date, time.month, time.year, time.hours, time.minutes, time.seconds, (time.mode12h)==1 ? ((time.pm == 1) ? "PM" : "AM") : "", hum_str, temp_str);
-    HAL_UART_Transmit(&huart2, (uint8_t *)uart_msg, strlen(uart_msg), 100);
+    // Convert to string for printing only
+    char hum_str[10];
+    uint8_t hum_int = (uint8_t)dht20_data.humidity;
+    uint8_t hum_dec = (uint8_t)((dht20_data.humidity - hum_int)*10);
+    sprintf(hum_str, "%d.%1d", hum_int, hum_dec);
+    char temp_str[10];
+    uint8_t temp_int = (uint8_t)dht20_data.temperature;
+    uint8_t temp_dec = (uint8_t)((dht20_data.temperature - temp_int)*10);
+    sprintf(temp_str, "%d.%1d", temp_int, temp_dec);
+    
+    // #if DISPLAY == 0
+      char uart_msg[80];
+      sprintf(uart_msg, "%s %02d/%02d/20%02d - Time: %02d:%02d:%02d %s || Humidity: %s%% - Temperature: %soC \r\n", 
+        weekday[time.day-1] ,time.date, time.month, time.year, time.hours, time.minutes, time.seconds, (time.mode12h)==1 ? ((time.pm == 1) ? "pm" : "am") : "", hum_str, temp_str);
+      HAL_UART_Transmit(&huart2, (uint8_t *)uart_msg, strlen(uart_msg), 100);
+    // #else
+      lcd_goto_XY(0, 0);
+      // sprintf(msg, "%s %02d/%02d/%02d", weekday[time.day-1] ,time.date, time.month, time.year);
+      sprintf(msg, "%02d/%01d  %02d:%02d:%02d%s", time.date, time.month, time.hours, time.minutes, time.seconds, (time.mode12h)==1 ? ((time.pm == 1) ? "pm" : "am") : "");
+      lcd_send_string(msg);
+      lcd_goto_XY(1, 0);
+      sprintf(msg, "%s%% %soC", hum_str, temp_str);
+      lcd_send_string(msg);
+    // #endif
     
     HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin); // Heartbeat decoration
     HAL_Delay(1000);

@@ -1,6 +1,5 @@
 #include "dht20.h"
-#include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_i2c.h"
+
 
 int DHT20_Init(I2C_HandleTypeDef* hi2c) {
   HAL_Delay(100); // Wait for DHT20 to start up

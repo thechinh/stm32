@@ -1,6 +1,5 @@
 #include "ds1307.h"
-#include <stdint.h>
-#include "stm32f4xx_hal.h"
+
 
 uint8_t bcd2dec(uint8_t bcd) {
   return (bcd >> 4) * 10 + (bcd & 0x0F);
@@ -19,6 +18,7 @@ void DS1307_ReadTime(I2C_HandleTypeDef* hi2c, DS1307_Time_t *time) {
   time->mode12h = (data[2] & 0x40) >> 6;
   if (time->mode12h == 1) {
     time->hours = bcd2dec(data[2] & 0x1F);
+    time->pm = (data[2] & 0x20) >> 5;
   } else {
     time->hours = bcd2dec(data[2] & 0x3F);
   }
