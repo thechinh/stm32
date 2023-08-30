@@ -35,8 +35,10 @@
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
-#define SET_TIME 0 // Set time to DS1307
-#define DISPLAY 1 // UART or LCD
+// CONFIGURATION
+#define SLAVE_ADDRESS_LCD 0x21 << 1     // Ohstem PCF8574T with AO=1, A1=0, A2=0 => 0x21. By default, the address is 0x27
+#define SET_TIME 0                      // Set time to DS1307
+#define DISPLAY 1                       // UART = 0, LCD = 1
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -118,7 +120,7 @@ int main(void)
 
   #if DISPLAY == 1 // LCD
     char msg[16];
-    lcd_init();
+    lcd_init(&hi2c1, SLAVE_ADDRESS_LCD);
   #endif
 
   /* USER CODE END 2 */
