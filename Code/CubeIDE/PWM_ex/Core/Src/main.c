@@ -2,18 +2,14 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Main program body
+  * @brief          : Control LED brightness with PWM
+  * - User button is used to change the brightness of the LED
+  * - Press button to increase brightness, then decrease. Step size is 20%
+  * 
+  * - PWM frequency is 10kHz
+  * - LED is connected to PD13
   ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
+
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
@@ -57,6 +53,7 @@ static void MX_TIM4_Init(void);
 
 /* Private user code -------	--------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if (GPIO_Pin == GPIO_PIN_0) {
