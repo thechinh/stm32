@@ -40,7 +40,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define SET_TIME 0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -109,7 +109,7 @@ int main(void)
   MX_RTC_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -128,13 +128,13 @@ int main(void)
     }
 
     // set new time and date
-    sDate.Date = 7;
-    sDate.WeekDay = 5;
-    sTime.Hours = 21;
-    sTime.Minutes = 15;
-    sTime.Seconds = 0;
-    HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
-    HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+    // sDate.Date = 7;
+    // sDate.WeekDay = 5;
+    // sTime.Hours = 21;
+    // sTime.Minutes = 15;
+    // sTime.Seconds = 0;
+    // HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+    // HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
 
     /* USER CODE BEGIN 3 */
   }
