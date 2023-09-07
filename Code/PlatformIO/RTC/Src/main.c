@@ -67,6 +67,11 @@ void MX_USB_HOST_Process(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+// Alarm A callback
+void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
+{
+  HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+}
 
 /* USER CODE END 0 */
 
@@ -118,14 +123,14 @@ int main(void)
   {
     /* USER CODE END WHILE */
     MX_USB_HOST_Process();
-    
-    for (int i = 0; i < 10; i++) {
-      HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
-      HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
-      sprintf(debug_msg, "%02d/%02d/%02d %02d:%02d:%02d\r\n", sDate.Month, sDate.Date, 2000 + sDate.Year, sTime.Hours, sTime.Minutes, sTime.Seconds);
-      HAL_UART_Transmit(&huart2, (uint8_t*)debug_msg, strlen(debug_msg), 100);
-      HAL_Delay(1000);
-    }
+
+
+    HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+    sprintf(debug_msg, "%02d/%02d/%02d %02d:%02d:%02d\r\n", sDate.Month, sDate.Date, 2000 + sDate.Year, sTime.Hours, sTime.Minutes, sTime.Seconds);
+    HAL_UART_Transmit(&huart2, (uint8_t*)debug_msg, strlen(debug_msg), 100);
+    HAL_Delay(1000);
+
 
     // set new time and date
     // sDate.Date = 7;
