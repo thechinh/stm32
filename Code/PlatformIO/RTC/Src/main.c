@@ -53,7 +53,14 @@
 /* USER CODE BEGIN PV */
 RTC_DateTypeDef sDate;
 RTC_TimeTypeDef sTime;
+RTC_AlarmTypeDef sAlarm;
 char debug_msg[50];
+
+unsigned char rxByte = 0;
+char rxBuffer[30] = {0};
+unsigned char rxIndex = 0;
+
+const char weekdayTable[7][4] = {"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,6 +78,89 @@ void MX_USB_HOST_Process(void);
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 {
   HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+}
+
+// UART RX callback
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+  char time[9];
+  char weekday[4];
+  // char weekdays[7][4];
+  char repeat[7];
+  uint8_t date, month, year;
+
+  if (rxByte != '\n') // '\n' is auto added by serial monitor when hit Enter key
+  {
+    rxBuffer[rxIndex++] = rxByte;
+
+    if (rxIndex >= 30)
+      rxIndex = 0;
+  } 
+  else {
+    rxBuffer[rxIndex] = '\0';
+    rxIndex = 0;
+
+    // Parse command. Format: "SET_TIME 00:00:10" or "SET_DATE 09/09/23 SAT" or "SET_ALARM 00:00:30 repeat WED MON|TUE|WED|THU|FRI|SAT|SUN"
+    if (strncmp(rxBuffer, "SET_TIME", 8) == 0) {
+      if (sscanf(rxBuffer, "SET_TIME %d:%d:%d", &sTime.Hours, &sTime.Minutes, &sTime.Seconds) == 3) {
+        HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+      }
+    }
+    else if (strncmp(rxBuffer, "SET_DATE", 8) == 0) {      
+      if (sscanf(rxBuffer, "SET_DATE %d/%d/%d %3s", &date, &month, &year, weekday) == 4) { // %hhu for uint8_t doesn't work
+        for (int i = 0; i < 7; i++) {
+          if (strncmp(weekday, weekdayTable[i], 3) == 0) {
+            sDate.WeekDay = i + 1;
+          }
+        }
+        sDate.Date = date;
+        sDate.Month = month;
+        sDate.Year = year;
+
+        HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+      }
+
+    }
+    else if (strncmp(rxBuffer, "SET_ALARM", 9) == 0) {
+      int parsed = sscanf(rxBuffer, "SET_ALARM %s %s %s", time, repeat, weekday);
+
+      if (parsed >= 1) {
+        sscanf(time, "%u:%u:%u", &sAlarm.AlarmTime.Hours, &sAlarm.AlarmTime.Minutes, &sAlarm.AlarmTime.Seconds);
+        
+        // Time + repeat
+        if (parsed >= 3 && strncmp(repeat, "repeat", 6) == 0) {
+          
+          for (int i = 0; i < 7; i++) {
+            if (strncmp(weekday, weekdayTable[i], 3) == 0) {
+              sAlarm.AlarmDateWeekDay = i + 1;
+              break;
+            }
+          }
+        // TODO: handle invalid weekday
+        } 
+        else {
+          // Time only, no repeat. Alarm will be triggered once at the next time match
+          // if current time is sooner than alarm time, set alarm date to today, otherwise set to tomorrow
+          if (sTime.Hours < sAlarm.AlarmTime.Hours || (sTime.Hours == sAlarm.AlarmTime.Hours && sTime.Minutes < sAlarm.AlarmTime.Minutes) || (sTime.Hours == sAlarm.AlarmTime.Hours && sTime.Minutes == sAlarm.AlarmTime.Minutes && sTime.Seconds < sAlarm.AlarmTime.Seconds)) {
+            sAlarm.AlarmDateWeekDay = sDate.WeekDay;
+          }
+          else {
+            sAlarm.AlarmDateWeekDay = sDate.WeekDay + 1;
+            if (sAlarm.AlarmDateWeekDay > 7) {
+              sAlarm.AlarmDateWeekDay = 1;
+            }
+          } 
+        }
+      }
+
+      // Default values
+      sAlarm.Alarm = RTC_ALARM_A;
+      sAlarm.AlarmTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+      sAlarm.AlarmTime.StoreOperation = RTC_STOREOPERATION_RESET;      
+      sAlarm.AlarmDateWeekDaySel = RTC_ALARMDATEWEEKDAYSEL_WEEKDAY;
+      HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN);
+    }
+  }
+  HAL_UART_Receive_IT(&huart2, &rxByte, 1);
 }
 
 /* USER CODE END 0 */
@@ -114,7 +204,7 @@ int main(void)
   MX_RTC_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  
+  HAL_UART_Receive_IT(&huart2, &rxByte, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -127,19 +217,9 @@ int main(void)
 
     HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
     HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
-    sprintf(debug_msg, "%02d/%02d/%02d %02d:%02d:%02d\r\n", sDate.Month, sDate.Date, 2000 + sDate.Year, sTime.Hours, sTime.Minutes, sTime.Seconds);
+    sprintf(debug_msg, "%3s %02d/%02d/%02d %02d:%02d:%02d\r\n", weekdayTable[sDate.WeekDay-1], sDate.Date, sDate.Month, 2000 + sDate.Year, sTime.Hours, sTime.Minutes, sTime.Seconds);
     HAL_UART_Transmit(&huart2, (uint8_t*)debug_msg, strlen(debug_msg), 100);
     HAL_Delay(1000);
-
-
-    // set new time and date
-    // sDate.Date = 7;
-    // sDate.WeekDay = 5;
-    // sTime.Hours = 21;
-    // sTime.Minutes = 15;
-    // sTime.Seconds = 0;
-    // HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
-    // HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
 
     /* USER CODE BEGIN 3 */
   }
