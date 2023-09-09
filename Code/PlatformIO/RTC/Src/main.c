@@ -59,6 +59,7 @@ char debug_msg[50];
 unsigned char rxByte = 0;
 char rxBuffer[30] = {0};
 unsigned char rxIndex = 0;
+int alarm_repeat = 0;
 
 const char weekdayTable[7][4] = {"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"};
 /* USER CODE END PV */
@@ -78,6 +79,13 @@ void MX_USB_HOST_Process(void);
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 {
   HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+  sprintf(debug_msg, "Alarm triggered! \r\n");
+  HAL_UART_Transmit(&huart2, (uint8_t*)debug_msg, strlen(debug_msg), 100);
+  
+  if (alarm_repeat == 0) {
+    // Disable alarm
+    HAL_RTC_DeactivateAlarm(hrtc, RTC_ALARM_A);
+  }
 }
 
 // UART RX callback
@@ -99,7 +107,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     rxBuffer[rxIndex] = '\0';
     rxIndex = 0;
 
-    // Parse command. Format: "SET_TIME 00:00:10" or "SET_DATE 09/09/23 SAT" or "SET_ALARM 00:00:30 repeat WED MON|TUE|WED|THU|FRI|SAT|SUN"
+    // Parse command. Format: "SET_TIME 10:15:00" or "SET_DATE 23/09/23 SAT" or "SET_ALARM 10:15:15 repeat SAT MON|TUE|WED|THU|FRI|SAT|SUN"
     if (strncmp(rxBuffer, "SET_TIME", 8) == 0) {
       if (sscanf(rxBuffer, "SET_TIME %d:%d:%d", &sTime.Hours, &sTime.Minutes, &sTime.Seconds) == 3) {
         HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
@@ -135,7 +143,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
               break;
             }
           }
-        // TODO: handle invalid weekday
+          alarm_repeat = 1;
+          // TODO: handle invalid weekday
         } 
         else {
           // Time only, no repeat. Alarm will be triggered once at the next time match
@@ -148,7 +157,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
             if (sAlarm.AlarmDateWeekDay > 7) {
               sAlarm.AlarmDateWeekDay = 1;
             }
-          } 
+          }
+          alarm_repeat = 0;
         }
       }
 
@@ -158,6 +168,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
       sAlarm.AlarmTime.StoreOperation = RTC_STOREOPERATION_RESET;      
       sAlarm.AlarmDateWeekDaySel = RTC_ALARMDATEWEEKDAYSEL_WEEKDAY;
       HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN);
+
+      sprintf(debug_msg, "OK - Alarm is set. \r\n");
+      HAL_UART_Transmit(&huart2, (uint8_t*)debug_msg, strlen(debug_msg), 100);
     }
   }
   HAL_UART_Receive_IT(&huart2, &rxByte, 1);
