@@ -85,8 +85,8 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
   sprintf(debug_msg, "Alarm triggered! \r\n");
   HAL_UART_Transmit(&huart2, (uint8_t*)debug_msg, strlen(debug_msg), 100);
   
+  // trigger-once mode
   if (alarm_repeat == 0) {
-    // Disable alarm
     HAL_RTC_DeactivateAlarm(hrtc, RTC_ALARM_A);
   }
 }
@@ -101,7 +101,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   HAL_UARTEx_ReceiveToIdle_DMA(&huart2, (uint8_t *)rxBuffer, UART_BUFFER_SIZE);
   rxSize = Size;
 
-  // Parse command. Format: "SET_TIME 19:20:00" or "SET_DATE 10/09/23 SUN" or "SET_ALARM 10:15:15 repeat SAT MON|TUE|WED|THU|FRI|SAT|SUN"
+  // Parse command. Format examples:
+  // - "SET_TIME 19:20:00" or "SET_DATE 10/09/23 SUN"
+  // - "SET_ALARM 10:15:15" (Mode trigger-once) or "SET_ALARM 10:15:15 repeat MON|TUE|WED|THU|FRI|SAT|SUN" (Mode repeat)
   if (strncmp(rxBuffer, "SET_TIME", 8) == 0) {
     if (sscanf(rxBuffer, "SET_TIME %d:%d:%d", &sTime.Hours, &sTime.Minutes, &sTime.Seconds) == 3) {
       HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
