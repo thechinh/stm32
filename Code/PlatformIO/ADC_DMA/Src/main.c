@@ -4,15 +4,11 @@
   * @file           : main.c
   * @brief          : Main program body
   ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
+MAIN CONFIGURATION
+- ADC single channel, continous mode
+- ADC DMA enable, mode Normal (auto disable after 1 conversion) or Circular
+
+
   ******************************************************************************
   */
 /* USER CODE END Header */
@@ -38,7 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define ADC_BUF_SIZE 4096
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -49,8 +45,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-// ADC buffer
-uint16_t adc_buf[10] = {0};
+uint16_t adc_buf[ADC_BUF_SIZE] = {0};
 
 /* USER CODE END PV */
 
@@ -67,7 +62,17 @@ void MX_USB_HOST_Process(void);
 /* USER CODE BEGIN 0 */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-    __NOP();
+    // do something
+    HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+    
+    // HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buf, 10); // ADC DMA normal mode auto disable, so enable it
+}
+
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
+{
+    // do something
+    HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+
 }
 /* USER CODE END 0 */
 
@@ -110,7 +115,7 @@ int main(void)
   MX_USB_HOST_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_ADC_Start_DMA(&hadc1, adc_buf, 10);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buf, ADC_BUF_SIZE);
 
   /* USER CODE END 2 */
 

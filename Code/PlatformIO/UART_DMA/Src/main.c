@@ -25,6 +25,7 @@
 #include "usart.h"
 #include "usb_host.h"
 #include "gpio.h"
+#include <string.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -65,12 +66,20 @@ void MX_USB_HOST_Process(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-// test abcd12 abcde1234 abcdef7890123456
+// Test: abcd12 abcde1234 abcdef7890123456
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) 
 {
   HAL_UARTEx_ReceiveToIdle_DMA(huart, uart_buffer, UART_BUFFER_SIZE);
+  __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT); // Disable half-transfer RX interrupt 
   uart_rx_size = Size;
 }
+
+// UART Tx DMA callback
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+  HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -80,6 +89,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  // A long random message just to test
+  char msg[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. " \
+                "Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. " \
+                "Praesent et diam eget libero egestas mattis sit amet vitae augue. \r\n";
 
   /* USER CODE END 1 */
 
@@ -112,8 +125,9 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UARTEx_ReceiveToIdle_DMA(&huart2, uart_buffer, UART_BUFFER_SIZE);
-  __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT); // Disable half-transfer interrupt
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart2, uart_buffer, UART_BUFFER_SIZE); //Enable IDLE line detection interrupt mode
+  __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT); // Disable half-transfer RX interrupt 
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -122,6 +136,10 @@ int main(void)
   {
     /* USER CODE END WHILE */
     MX_USB_HOST_Process();
+    
+    // send UART message using DMA every second
+    HAL_UART_Transmit_DMA(&huart2, (uint8_t *)msg, sizeof(msg));
+    HAL_Delay(1000);
 
     /* USER CODE BEGIN 3 */
   }

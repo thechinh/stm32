@@ -99,6 +99,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   uint8_t date, month, year;
 
   HAL_UARTEx_ReceiveToIdle_DMA(&huart2, (uint8_t *)rxBuffer, UART_BUFFER_SIZE);
+  __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT); // Disable half-transfer interrupt
   rxSize = Size;
 
   // Parse command. Format examples:
