@@ -6,14 +6,15 @@
   ******************************************************************************
   F411 Disco init default
   
-  2 Modes: Interrupt (comment out) and DMA
+  In this example I will use SPI1 run in mode Master (NSS pin controlled by software)
+  to send data. SPI4 runs in mode Slave (NSS pin controlled by hardware) receive data
+  using Interrupt (comment out) or DMA.
   
-  Connection:
-  SPI1 <-> SPI4
-    SCK <-> SCK
-    MISO <-> MISO
-    MOSI <-> MOSI
-    CS (PA4) <-> NSS
+  SPI1 <-> SPI4 Connection:
+    PA5 (SCK)  <-> PE12 (SCK)
+    PA6 (MISO) <-> PE13 (MISO)
+    PA7 (MOSI) <-> PE6 (MOSI)
+    CS  (PA4)  <-> PE11 (NSS)
   ******************************************************************************
   */
 /* USER CODE END Header */
@@ -38,7 +39,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define spi_enable    HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_RESET)
+#define spi_disable   HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_SET)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -49,10 +51,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-char Tx_master[] = "Hello World\n";
-char Rx_slave[] = {0};
-char Rx_slave_buffer[20] = {0};
-uint8_t RxBufferIndex = 0;
+// Interrupt mode
+// char Tx_master[] = "Hello World\n";
+// char Rx_slave[] = {0};
+// char Rx_slave_buffer[20] = {0};
+// uint8_t RxBufferIndex = 0;
+
+uint8_t send_data = 32, receive_data = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -77,6 +82,14 @@ void MX_USB_HOST_Process(void);
 //       RxBufferIndex = 0;
 //   }
 // }
+
+// DMA mode
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
+  if(hspi->Instance == hspi1.Instance) {
+    spi_disable;  // release the SPI slave in case other mcus want to access
+    HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -114,9 +127,10 @@ int main(void)
   MX_SPI4_Init();
   MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
-  // HAL_SPI_Receive_IT(&hspi4, (uint8_t*)Rx_slave, 1); // Interrupt mode
-  HAL_SPI_Receive_DMA(&hspi4, (uint8_t*)Rx_slave_buffer, 20);
-  HAL_SPI_Transmit(&hspi1, (uint8_t*)Tx_master, strlen(Tx_master), 1000);
+  // Interrupt mode
+  // HAL_SPI_Receive_IT(&hspi4, (uint8_t*)Rx_slave, 1);
+  // HAL_SPI_Transmit(&hspi1, (uint8_t*)Tx_master, strlen(Tx_master), 1000); 
+  HAL_SPI_Receive_DMA(&hspi4, &receive_data, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -127,6 +141,10 @@ int main(void)
     MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
+    spi_enable;
+    HAL_SPI_Transmit_IT(&hspi1, &send_data, 1);
+    send_data++;
+    HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
