@@ -4,17 +4,27 @@
   * @file           : main.c
   * @brief          : Main program body
   ******************************************************************************
-  F411 Disco init default
-  
-  In this example I will use SPI1 run in mode Master (NSS pin controlled by software)
-  to send data. SPI4 runs in mode Slave (NSS pin controlled by hardware) receive data
-  using Interrupt (comment out) or DMA.
-  
-  SPI1 (master) <-> SPI4 (slave) Connection:
-    PA5 (SCK)  <-> PE12 (SCK)
-    PA6 (MISO) <-> PE13 (MISO)?
-    PA7 (MOSI) <-> PE6 (MOSI)
-    CS  (PA4)  <-> PE11 (NSS)
+// Input
+VCC    <-> +15V
+VSS    <-> -15V
+AGND <-> GND của VCC VSS <-> GND MCU
+
+VDD    <-> 5V MCU
+DGND <-> GND MCU
+
+CS <-> GND
+
+// Output
+Vout
+AGND
+
+// Data connection with STM32 SPI1
+PA5 <-> SCK
+PA7 (MOSI) <-> SDI
+
+PB0 - LDAC
+PB1 - RST
+PB2 - RSTSEL
   ******************************************************************************
   */
 /* USER CODE END Header */
@@ -29,7 +39,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <string.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -39,8 +49,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define spi_enable    HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_RESET)
-#define spi_disable   HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_SET)
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,13 +60,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-// Interrupt mode
-// char Tx_master[] = "Hello World\n";
-// char Rx_slave[] = {0};
-// char Rx_slave_buffer[20] = {0};
-// uint8_t RxBufferIndex = 0;
-
-uint8_t send_data = 32, receive_data = 0;
+uint16_t send_data = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,27 +73,24 @@ void MX_USB_HOST_Process(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// Interrupt Mode
-// void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
-//   HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
-
-//   UNUSED(hspi);
-//   if(hspi->Instance == SPI4) {
-//     HAL_SPI_Receive_IT(&hspi4, (uint8_t*)Rx_slave, 1);
-//     Rx_slave_buffer[RxBufferIndex++] = Rx_slave[0];
-//     if(Rx_slave[0] == '\n')
-//       RxBufferIndex = 0;
-//   }
-// }
-
-// DMA mode
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
   UNUSED(hspi);
   if(hspi->Instance == hspi1.Instance) {
-    spi_disable;  // release the SPI slave in case other mcus want to access
+    HAL_GPIO_WritePin(LDAC_GPIO_Port, LDAC_Pin, GPIO_PIN_SET); // Latch data
     HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
   }
 }
+
+void setDACtoMinus10V() {
+  HAL_GPIO_WritePin(RST_GPIO_Port, RST_Pin, GPIO_PIN_RESET); // RST Low
+  HAL_GPIO_WritePin(RSTSEL_GPIO_Port, RSTSEL_Pin, GPIO_PIN_RESET); // RSTSEL Low
+}
+
+void setDACto0V() {
+  HAL_GPIO_WritePin(RST_GPIO_Port, RST_Pin, GPIO_PIN_RESET); // RST Low
+  HAL_GPIO_WritePin(RSTSEL_GPIO_Port, RSTSEL_Pin, GPIO_PIN_SET); // RSTSEL High
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -125,13 +125,8 @@ int main(void)
   MX_I2C1_Init();
   MX_I2S2_Init();
   MX_SPI1_Init();
-  MX_SPI4_Init();
   MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
-  // Interrupt mode
-  // HAL_SPI_Receive_IT(&hspi4, (uint8_t*)Rx_slave, 1);
-  // HAL_SPI_Transmit(&hspi1, (uint8_t*)Tx_master, strlen(Tx_master), 1000); 
-  HAL_SPI_Receive_DMA(&hspi4, &receive_data, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -142,10 +137,11 @@ int main(void)
     MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
-    spi_enable;
-    HAL_SPI_Transmit_IT(&hspi1, &send_data, 1);
+    HAL_GPIO_WritePin(RST_GPIO_Port, RST_Pin, GPIO_PIN_SET); // RST High + CS always Low => ready to send
+    HAL_GPIO_WritePin(LDAC_GPIO_Port, LDAC_Pin, GPIO_PIN_RESET); // clear LDAC pin
+    HAL_SPI_Transmit_IT(&hspi1, (uint8_t*)&send_data, 1);       // send. For small data, IT mode is faster than DMA mode
     send_data++;
-    HAL_Delay(1000);
+    HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }
