@@ -8,6 +8,7 @@
         "main.h": "c",
         "i2s.h": "c",
         "stm32f4xx_hal_conf.h": "c",
-        "spi.h": "c"
+        "spi.h": "c",
+        "dht20.h": "c"
     }
 }

@@ -8,8 +8,8 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "/Users/chinh/Documents/1_Projects/stm32/Code/PlatformIO/SPI_simple/Inc",
-                "/Users/chinh/Documents/1_Projects/stm32/Code/PlatformIO/SPI_simple/Src",
+                "/Users/chinh/Documents/1_Projects/stm32/Code/PlatformIO/SPI_simple/Inc_X",
+                "/Users/chinh/Documents/1_Projects/stm32/Code/PlatformIO/SPI_simple/Src_X",
                 "/Users/chinh/.platformio/packages/framework-stm32cubef4/Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc",
                 "/Users/chinh/.platformio/packages/framework-stm32cubef4/Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Src",
                 "/Users/chinh/.platformio/packages/framework-stm32cubef4/Middlewares/ST/STM32_USB_Host_Library/Core/Inc",
@@ -89,8 +89,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "/Users/chinh/Documents/1_Projects/stm32/Code/PlatformIO/SPI_simple/Inc",
-                    "/Users/chinh/Documents/1_Projects/stm32/Code/PlatformIO/SPI_simple/Src",
+                    "/Users/chinh/Documents/1_Projects/stm32/Code/PlatformIO/SPI_simple/Inc_X",
+                    "/Users/chinh/Documents/1_Projects/stm32/Code/PlatformIO/SPI_simple/Src_X",
                     "/Users/chinh/.platformio/packages/framework-stm32cubef4/Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc",
                     "/Users/chinh/.platformio/packages/framework-stm32cubef4/Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Src",
                     "/Users/chinh/.platformio/packages/framework-stm32cubef4/Middlewares/ST/STM32_USB_Host_Library/Core/Inc",

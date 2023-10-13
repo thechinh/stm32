@@ -169,7 +169,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=60110",
+                "PLATFORMIO=60111",
                 "STM32F4",
                 "STM32F411xE",
                 "USE_HAL_DRIVER",
